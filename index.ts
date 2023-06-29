@@ -251,7 +251,7 @@ const addTranslatedTextToVideo = async (
 
       // sometimes there is a weird bug where it adds a ' to the text, this fixes it
       const escapedText = !text ? text : text.replace(/'/g, "\u2019");
-      return `drawtext=fontfile=OpenSans-Regular.ttf:box=1:boxcolor=black@0.5:fontsize=38:alpha:0.5:fontcolor=white:x=(w-text_w)/2:y=h-th-140:text='${escapedText}':enable='between(t,${startTime},${endTime})'`;
+      return `drawtext=font='Open Sans':box=1:boxcolor=black@0.5:fontsize=38:alpha:0.5:fontcolor=white:x=(w-text_w)/2:y=h-th-140:text='${escapedText}':enable='between(t,${startTime},${endTime})'`;
     })
     .join(",");
 
@@ -277,22 +277,22 @@ const addTranslatedTextToVideo = async (
       });
   });
 
-  const command = `ffmpeg -i ./videos/${videoId}.mp4 -vf "${videoText}" ./translatedVideos/${language}/${videoId}.mp4`;
-  // // save this command to a file
+  // const command = `ffmpeg -i ./videos/${videoId}.mp4 -vf ${videoText} ./translatedVideos/${language}/${videoId}.mp4`;
+  // // // save this command to a file
   // writeFileSync(`./translatedVideos/${language}/${videoId}.sh`, command);
-  // // execute command and return promise
-  // const exec = require("child_process").exec;
-  // const promise = new Promise((resolve, reject) => {
-  //   exec(command, (err: any, stdout: any, stderr: any) => {
-  //     if (err) {
-  //       reject(err);
-  //       console.log("An error occurred while creating the video:", err);
-  //       return;
-  //     }
-  //     resolve(true);
-  //     console.log("Translated Video Saved");
-  //   });
-  // });
+  // // // execute command and return promise
+  // // const exec = require("child_process").exec;
+  // // const promise = new Promise((resolve, reject) => {
+  // //   exec(command, (err: any, stdout: any, stderr: any) => {
+  // //     if (err) {
+  // //       reject(err);
+  // //       console.log("An error occurred while creating the video:", err);
+  // //       return;
+  // //     }
+  // //     resolve(true);
+  // //     console.log("Translated Video Saved");
+  // //   });
+  // // });
 
   await promise;
 };
@@ -518,6 +518,3 @@ app.get("/video", async (req, res) => {
 app.listen(port, () => {
   console.log(`Youtube Translator app listening on port ${port}`);
 });
-
-const pathToFfmpeg = require("ffmpeg-static");
-console.log(pathToFfmpeg);

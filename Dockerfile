@@ -3,8 +3,7 @@ WORKDIR /app
 COPY package*.json /app
 COPY index.ts /app
 COPY tsconfig.json /app
-#remove before production
-COPY .env /app/.env
+
 COPY OpenSans-Regular.ttf /app/OpenSans-Regular.ttf
 
 RUN apk update
@@ -17,6 +16,11 @@ RUN npm install -g ts-node
 RUN chown -R root:root /app
 RUN chmod -R 755 /app 
 
-ENV PORT 3800
+COPY ./OpenSans-Regular.ttf ./
+RUN mkdir -p /usr/share/fonts/truetype/
+RUN install -m644 OpenSans-Regular.ttf /usr/share/fonts/truetype/
+RUN rm ./OpenSans-Regular.ttf
+
+ENV PORT 3200
 EXPOSE $PORT
 CMD ts-node index.ts
