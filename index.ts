@@ -7,6 +7,7 @@ import {
   mkdirSync,
   readFileSync,
   statSync,
+  unlinkSync,
   writeFileSync
 } from "fs";
 import { google, youtube_v3 } from "googleapis";
@@ -247,7 +248,8 @@ const addTranslatedTextToVideo = async (
         index + 1 != translatedParts.length
           ? translatedParts[index + 1].offset / 1000
           : videoDuration;
-      const text = part.translation;
+      let text = part.translation;
+      if (text == undefined) text = "";
 
       // sometimes there is a weird bug where it adds a ' to the text, this fixes it
       const escapedText = !text ? text : text.replace(/'/g, "\u2019");
@@ -261,8 +263,6 @@ const addTranslatedTextToVideo = async (
     await mkdirSync(`./translatedVideos/${language}`);
   }
 
-  console.log("Made it here, right before ffmpeg");
-  // convert this to a command instead of using ffmpeg here
   const promise = new Promise((resolve, reject) => {
     ffmpeg(`./videos/${videoId}.mp4`)
       .complexFilter([videoText])
@@ -276,23 +276,6 @@ const addTranslatedTextToVideo = async (
         console.log("An error occurred while creating the video:", err);
       });
   });
-
-  // const command = `ffmpeg -i ./videos/${videoId}.mp4 -vf ${videoText} ./translatedVideos/${language}/${videoId}.mp4`;
-  // // // save this command to a file
-  // writeFileSync(`./translatedVideos/${language}/${videoId}.sh`, command);
-  // // // execute command and return promise
-  // // const exec = require("child_process").exec;
-  // // const promise = new Promise((resolve, reject) => {
-  // //   exec(command, (err: any, stdout: any, stderr: any) => {
-  // //     if (err) {
-  // //       reject(err);
-  // //       console.log("An error occurred while creating the video:", err);
-  // //       return;
-  // //     }
-  // //     resolve(true);
-  // //     console.log("Translated Video Saved");
-  // //   });
-  // // });
 
   await promise;
 };
@@ -397,6 +380,12 @@ const createTranslatedVideo = async (
             if (progress === 100) {
               console.log("\n\n");
               console.log("Video Uploaded");
+              console.log("Deleting Video & Files..");
+              unlinkSync(newVideoInfo.videoFile);
+              unlinkSync(`./translations/${language}/${videoId}.json`);
+              unlinkSync(`./videos/${videoId}.mp4`);
+
+              console.log("Video Deleted");
             }
           }
         }
