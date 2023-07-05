@@ -254,7 +254,7 @@ const addTranslatedTextToVideo = async (
 
       // sometimes there is a weird bug where it adds a ' to the text, this fixes it
       const escapedText = !text ? text : text.replace(/'/g, "\u2019");
-      return `drawtext=font='Open Sans':box=1:boxcolor=black@0.5:fontsize=38:alpha:0.5:fontcolor=white:x=(w-text_w)/2:y=h-th-140:text='${escapedText}':enable='between(t,${startTime},${endTime})'`;
+      return `drawtext=box=1:boxcolor=black@0.5:fontsize=38:alpha:0.5:fontcolor=white:x=(w-text_w)/2:y=h-th-140:text='${escapedText}':enable='between(t,${startTime},${endTime})'`;
     })
     .join(",");
 
