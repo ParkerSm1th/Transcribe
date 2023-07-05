@@ -270,7 +270,7 @@ const addTranslatedTextToVideo = async (
 
   const promise = new Promise((resolve, reject) => {
     ffmpeg(`./videos/${videoId}.mp4`)
-      .addOption("-filter_complex", videoText)
+      .complexFilter([videoText])
       .save(`./translatedVideos/${language}/${videoId}.mp4`)
       .on("end", () => {
         resolve(true);
