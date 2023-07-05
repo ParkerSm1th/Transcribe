@@ -264,6 +264,10 @@ const addTranslatedTextToVideo = async (
     await mkdirSync(`./translatedVideos/${language}`);
   }
 
+  const command =
+    `ffmpeg -i ./videos/${videoId}.mp4 -vf ` + videoText + " output.mp4";
+  console.log(command);
+
   const promise = new Promise((resolve, reject) => {
     ffmpeg(`./videos/${videoId}.mp4`)
       .complexFilter([videoText])
