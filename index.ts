@@ -14,6 +14,7 @@ import { google, youtube_v3 } from "googleapis";
 import { Configuration, OpenAIApi } from "openai";
 import readline from "readline";
 import { YoutubeTranscript } from "youtube-transcript";
+
 require("dotenv").config();
 
 type OpenAiMessage = {
