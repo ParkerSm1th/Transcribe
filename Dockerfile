@@ -24,4 +24,4 @@ RUN rm ./OpenSans-Regular.ttf
 ENV PORT 3200
 EXPOSE $PORT
 EXPOSE 80
-CMD ts-node index.ts
+CMD node build/index.js
