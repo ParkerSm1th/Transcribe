@@ -216,13 +216,6 @@ const fetchVideo = async (videoId: string, download = true) => {
       ffmpeg(`./videos/${videoId}-video.mp4`)
         .addInput(`./videos/${videoId}.mp3`)
         .save(`./videos/${videoId}.mp4`)
-        .on("progress", (progress) => {
-          readline.clearLine(process.stdout, 0);
-          readline.cursorTo(process.stdout, 0, null);
-          process.stdout.write(
-            `Merging Video & Audio: ${Math.round(progress.percent)}% complete`
-          );
-        })
         .on("end", () => {
           resolve(true);
           console.log("Video Merged");
@@ -270,10 +263,6 @@ const addTranslatedTextToVideo = async (
       await mkdirSync("./translatedVideos");
     await mkdirSync(`./translatedVideos/${language}`);
   }
-
-  const command =
-    `ffmpeg -i ./videos/${videoId}.mp4 -vf ` + videoText + " output.mp4";
-  console.log(command);
 
   const promise = new Promise((resolve, reject) => {
     ffmpeg(`./videos/${videoId}.mp4`)
