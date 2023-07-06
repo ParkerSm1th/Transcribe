@@ -1,8 +1,8 @@
 FROM node:16-alpine
 WORKDIR /app
-COPY package*.json /app
-COPY index.ts /app
-COPY tsconfig.json /app
+COPY package*.json /app/
+COPY index.ts /app/
+COPY tsconfig.json /app/
 
 COPY OpenSans-Regular.ttf /app/OpenSans-Regular.ttf
 
