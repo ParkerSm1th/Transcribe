@@ -39,7 +39,8 @@ enum SupportedLanguages {
   ENGLISH = "English",
   SPANISH = "Spanish",
   FRENCH = "French",
-  GERMAN = "German"
+  GERMAN = "German",
+  THAI = "Thai"
 }
 
 const parser = new ArgumentParser({
