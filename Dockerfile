@@ -17,6 +17,7 @@ RUN chown -R root:root /app
 RUN chmod -R 755 /app 
 
 COPY ./OpenSans-Regular.ttf ./
+
 RUN mkdir -p /usr/share/fonts/truetype/
 RUN install -m644 OpenSans-Regular.ttf /usr/share/fonts/truetype/
 RUN rm ./OpenSans-Regular.ttf
@@ -24,4 +25,4 @@ RUN rm ./OpenSans-Regular.ttf
 ENV PORT 3200
 EXPOSE $PORT
 EXPOSE 80
-CMD node build/index.js
+CMD ts-node index.ts
