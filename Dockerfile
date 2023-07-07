@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package*.json /app/
 COPY index.ts /app/
 COPY tsconfig.json /app/
+COPY utils/ /app/utils/
 
 COPY OpenSans-Regular.ttf /app/OpenSans-Regular.ttf
 
@@ -25,4 +26,4 @@ RUN rm ./OpenSans-Regular.ttf
 ENV PORT 3200
 EXPOSE $PORT
 EXPOSE 80
-CMD ts-node index.ts
+CMD node build/index.js
