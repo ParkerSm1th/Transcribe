@@ -211,7 +211,7 @@ export const createTranslatedVideo = async (
               description: newVideoInfo.description
             },
             status: {
-              privacyStatus: "private"
+              privacyStatus: "unlisted"
             }
           },
           media: {
