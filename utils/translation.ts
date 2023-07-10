@@ -1,6 +1,7 @@
 import { Configuration, OpenAIApi } from "openai";
 import { OpenAiMessage, SupportedLanguages, TranscriptPart } from "../types";
 import { getPrompt } from "./ai";
+import { removeOldestFromQueue } from "./queue";
 
 export const getTranslations = async (
   transcriptParts: TranscriptPart[],
@@ -36,6 +37,7 @@ export const getTranslations = async (
       return JSON.parse(response.data.choices[0].message.content);
     } catch (e) {
       console.log("An error occurred while translating:", e);
+      removeOldestFromQueue();
     }
   } catch (e) {
     console.log(e);
@@ -79,6 +81,7 @@ export const basicTranslation = async (
       return response.data.choices[0].message.content;
     } catch (e) {
       console.log("An error occurred while translating:", e);
+      removeOldestFromQueue();
     }
   } catch (e) {
     console.log(e);

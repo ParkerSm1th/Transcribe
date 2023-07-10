@@ -30,4 +30,5 @@ export interface QueueRequest {
   videoId: string;
   language: SupportedLanguages;
   youtube: youtube_v3.Youtube;
+  email: string;
 }

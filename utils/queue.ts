@@ -8,6 +8,7 @@ const addToQueue = (request: QueueRequest) => {
   if (currentQueue.length === 1) nextQueueAction();
 };
 
+// Just for testing when I don't want to waste tokens
 const delayedQueueAction = (request: QueueRequest) => {
   console.log("Running queue item", request.language, request.videoId);
   setTimeout(() => {
@@ -20,7 +21,7 @@ const nextQueueAction = () => {
   const next = currentQueue[0];
 
   //   delayedQueueAction(next);
-  createTranslatedVideo(next.videoId, next.language, next.youtube);
+  createTranslatedVideo(next.videoId, next.language, next.youtube, next.email);
 };
 
 export const removeOldestFromQueue = () => {

@@ -36,6 +36,7 @@ export const fetchVideo = async (videoId: string, download = true) => {
         .on("error", (err) => {
           reject(err);
           console.log("An error occurred while downloading the video:", err);
+          removeOldestFromQueue();
         });
     });
     const audioDownload = new Promise((resolve, reject) => {
@@ -50,6 +51,7 @@ export const fetchVideo = async (videoId: string, download = true) => {
         .on("error", (err) => {
           reject(err);
           console.log("An error occurred while downloading the audio:", err);
+          removeOldestFromQueue();
         });
     });
     const promises = Promise.all([videoDownload, audioDownload]);
@@ -69,6 +71,7 @@ export const fetchVideo = async (videoId: string, download = true) => {
         .on("error", (err) => {
           reject(err);
           console.log("An error occurred while merging the video:", err);
+          removeOldestFromQueue();
         });
     });
     await promise;
@@ -119,6 +122,7 @@ const addTranslatedTextToVideo = async (
       .on("error", (err) => {
         reject(err);
         console.log("An error occurred while creating the video:", err);
+        removeOldestFromQueue();
       });
   });
 
@@ -128,7 +132,8 @@ const addTranslatedTextToVideo = async (
 export const createTranslatedVideo = async (
   videoId: string,
   language: SupportedLanguages,
-  youtube: youtube_v3.Youtube
+  youtube: youtube_v3.Youtube,
+  email: string
 ) => {
   YoutubeTranscript.fetchTranscript(videoId).then(async (transcriptParts) => {
     const textParts = transcriptParts.map((part) => part.text);
@@ -241,7 +246,7 @@ export const createTranslatedVideo = async (
       });
 
       sendEmail(emailAPI, {
-        email: "parker@getmagical.com",
+        email: email,
         video: {
           title: newVideoInfo.title,
           link: `https://www.youtube.com/watch?v=${publishedVideo.data.id}`

@@ -1,4 +1,5 @@
 import { SendEmailRequest } from "customerio-node";
+import { removeOldestFromQueue } from "./queue";
 
 interface EmailOptions {
   email: string;
@@ -35,5 +36,8 @@ export async function sendEmail(api, options: EmailOptions): Promise<void> {
   api
     .sendEmail(request)
     .then((res) => console.log("Successfully sent email to " + options.email))
-    .catch((err) => console.log(err, err.statusCode, err.message));
+    .catch((err) => {
+      console.log(err, err.statusCode, err.message);
+      removeOldestFromQueue();
+    });
 }

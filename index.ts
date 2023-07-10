@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { google } from "googleapis";
 
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { SupportedLanguages } from "./types";
 import { newRequest, queueSize } from "./utils/queue";
 
@@ -20,16 +21,33 @@ const oAuth2Client = new google.auth.OAuth2(
   REDIRECT_URL
 );
 
-const scope = "https://www.googleapis.com/auth/youtube.upload";
+const youtubeScope = "https://www.googleapis.com/auth/youtube.upload";
+const emailScope = "https://www.googleapis.com/auth/userinfo.email";
 
 app.get("/", (req, res) => {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: "offline",
-    scope,
+    scope: emailScope,
     state: JSON.stringify({
+      signUp: false,
       link: req.query.link,
       language: req.query.language
     })
+  });
+  res.redirect(authUrl);
+});
+
+app.get("/setup", (req, res) => {
+  if (!req.query.language) return res.send("Please provide a language");
+
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: youtubeScope,
+    state: JSON.stringify({
+      signUp: true,
+      language: req.query.language
+    }),
+    prompt: "consent"
   });
   res.redirect(authUrl);
 });
@@ -43,6 +61,16 @@ app.get("/google/callback", (req, res) => {
         return;
       }
       const state = JSON.parse(req.query.state);
+      if (state.signUp) {
+        if (!existsSync("./creds")) {
+          await mkdirSync("./creds");
+        }
+
+        writeFileSync(`./creds/${state.language}.json`, JSON.stringify(token));
+        res.send("Setup!");
+        return;
+      }
+
       const urlifiedToken = encodeURIComponent(JSON.stringify(token));
       res.redirect(
         `/video?language=${state.language}&link=${state.link}&token=${urlifiedToken}`
@@ -57,8 +85,6 @@ app.get("/video", async (req, res) => {
       success: false,
       message: "Please login with a valid Google account"
     });
-
-  const token = JSON.parse(decodeURIComponent(req.query.token));
 
   if (!req.query.link || !req.query.language)
     return res.send({
@@ -79,14 +105,53 @@ app.get("/video", async (req, res) => {
       message: "Please provide a valid link"
     });
 
+  const authToken = JSON.parse(decodeURIComponent(req.query.token));
+  if (!existsSync(`./creds/${req.query.language}.json`)) {
+    return res.send({
+      success: false,
+      message: req.query.language + " channel has not been setup.."
+    });
+  }
+  const token = JSON.parse(
+    readFileSync(`./creds/${req.query.language}.json`).toString()
+  );
+
+  const idAuthClient = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URL
+  );
+  idAuthClient.setCredentials(authToken);
+
   // we don't store auth!
   const instanceAuthClient = new google.auth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,
     REDIRECT_URL
   );
-
   instanceAuthClient.setCredentials(token);
+
+  // decode authToken.id_token in order to get the email
+  const decoded = await idAuthClient.verifyIdToken({
+    idToken: authToken.id_token,
+    audience: CLIENT_ID
+  });
+  const email = decoded.getPayload()?.email;
+  if (!email || !decoded) {
+    console.log("Couldn't find email");
+    return res.send({
+      success: false,
+      message: "Please login with a valid Google account"
+    });
+  }
+
+  if (email.split("@")[1] !== "getmagical.com") {
+    console.log("Not a valid email");
+    return res.send({
+      success: false,
+      message: "Please login with a valid Google account"
+    });
+  }
 
   try {
     const youtube = google.youtube({
@@ -94,10 +159,10 @@ app.get("/video", async (req, res) => {
       version: "v3"
     });
     if (!youtube) {
-      console.log("Not logged in!");
+      console.log("Couldn't find auth for ", req.query.language);
       return res.send({
         success: false,
-        message: "Please login with a valid Google account"
+        message: req.query.language + " channel has not been setup.."
       });
     }
 
@@ -106,7 +171,8 @@ app.get("/video", async (req, res) => {
     newRequest({
       videoId,
       language: req.query.language,
-      youtube
+      youtube,
+      email
     });
   } catch (e) {
     console.log("Not logged in");

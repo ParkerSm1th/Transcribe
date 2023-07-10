@@ -2,6 +2,7 @@ FROM node:16-alpine
 WORKDIR /app
 COPY package*.json /app/
 COPY index.ts /app/
+COPY types.ts /app/
 COPY tsconfig.json /app/
 COPY utils/ /app/utils/
 
