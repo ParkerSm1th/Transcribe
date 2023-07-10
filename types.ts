@@ -23,7 +23,9 @@ export enum SupportedLanguages {
   SPANISH = "Spanish",
   FRENCH = "French",
   GERMAN = "German",
-  THAI = "Thai"
+  Portuguese = "Portuguese",
+  Indonesian = "Indonesian",
+  Tagalog = "Tagalog"
 }
 
 export interface QueueRequest {
