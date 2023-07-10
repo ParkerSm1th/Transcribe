@@ -112,9 +112,27 @@ app.get("/video", async (req, res) => {
       message: req.query.language + " channel has not been setup.."
     });
   }
-  const token = JSON.parse(
+  // we don't store auth!
+  const instanceAuthClient = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URL
+  );
+
+  let token = JSON.parse(
     readFileSync(`./creds/${req.query.language}.json`).toString()
   );
+
+  instanceAuthClient.setCredentials(token);
+
+  if (token.expiry_date < Date.now()) {
+    const newToken = await instanceAuthClient.refreshAccessToken();
+    instanceAuthClient.setCredentials(newToken.credentials);
+    await writeFileSync(
+      `./creds/${req.query.language}.json`,
+      JSON.stringify(newToken.credentials)
+    );
+  }
 
   const idAuthClient = new google.auth.OAuth2(
     CLIENT_ID,
@@ -122,14 +140,6 @@ app.get("/video", async (req, res) => {
     REDIRECT_URL
   );
   idAuthClient.setCredentials(authToken);
-
-  // we don't store auth!
-  const instanceAuthClient = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URL
-  );
-  instanceAuthClient.setCredentials(token);
 
   // decode authToken.id_token in order to get the email
   const decoded = await idAuthClient.verifyIdToken({
