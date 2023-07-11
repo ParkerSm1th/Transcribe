@@ -1,7 +1,7 @@
 import express, { Router } from "express";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { google } from "googleapis";
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { SupportedLanguages } from "./types";
 import { newRequest, queueSize } from "./utils/queue";
 
@@ -106,10 +106,13 @@ app.get("/video", async (req, res) => {
     });
 
   const authToken = JSON.parse(decodeURIComponent(req.query.token));
+  const setupLinkText = `Setup here: https://video-transcription.getmagical.net/setup?language=${req.query.language}`;
+
   if (!existsSync(`./creds/${req.query.language}.json`)) {
     return res.send({
       success: false,
-      message: req.query.language + " channel has not been setup.."
+      message:
+        req.query.language + ` channel has not been setup. ${setupLinkText}`
     });
   }
   // we don't store auth!
@@ -172,7 +175,8 @@ app.get("/video", async (req, res) => {
       console.log("Couldn't find auth for ", req.query.language);
       return res.send({
         success: false,
-        message: req.query.language + " channel has not been setup.."
+        message:
+          req.query.language + ` channel has not been setup. ${setupLinkText}`
       });
     }
 
