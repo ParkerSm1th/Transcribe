@@ -206,6 +206,12 @@ app.get("/video", async (req, res) => {
   }
 });
 
+app.get("/health", (req, res) => {
+  res.send({
+    success: true
+  });
+});
+
 app.listen(port, () => {
   console.log(`Youtube Translator app listening on port ${port}`);
 });
