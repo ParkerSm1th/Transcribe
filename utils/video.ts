@@ -9,13 +9,14 @@ import {
   unlinkSync
 } from "fs";
 import { youtube_v3 } from "googleapis";
-import readline from "readline";
 import { YoutubeTranscript } from "youtube-transcript";
+
 import { SupportedLanguages, TranslatedTranscriptPart } from "../types";
 import { sendEmail } from "./emails";
 import { saveFile } from "./files";
 import { removeOldestFromQueue } from "./queue";
 import { basicTranslation, getTranslations } from "./translation";
+
 export const fetchVideo = async (videoId: string, download = true) => {
   const ytdl = require("ytdl-core");
   const fs = require("fs");
@@ -223,9 +224,6 @@ export const createTranslatedVideo = async (
           // number of bytes uploaded to this point.
           onUploadProgress: (evt) => {
             const progress = (evt.bytesRead / fileSize) * 100;
-            readline.clearLine(process.stdout, 0);
-            readline.cursorTo(process.stdout, 0, null);
-            process.stdout.write(`${Math.round(progress)}% complete`);
 
             if (progress === 100) {
               console.log("\n\n");
