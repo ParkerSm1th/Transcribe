@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { google } from "googleapis";
 
 import { SupportedLanguages } from "./types";
-import { newRequest, queueSize } from "./utils/queue";
+import { getFormattedQueue, newRequest, queueSize } from "./utils/queue";
 
 require("dotenv").config();
 
@@ -77,6 +77,15 @@ app.get("/google/callback", (req, res) => {
       );
     });
   }
+});
+
+app.get("/queue", (req, res) => {
+  const queue = getFormattedQueue();
+
+  res.send({
+    success: true,
+    queue
+  });
 });
 
 app.get("/video", async (req, res) => {

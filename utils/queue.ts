@@ -24,6 +24,20 @@ const nextQueueAction = () => {
   createTranslatedVideo(next.videoId, next.language, next.youtube, next.email);
 };
 
+export const getFormattedQueue = () => {
+  const items = currentQueue.map((request) => {
+    return {
+      videoId: request.videoId,
+      language: request.language
+    };
+  });
+
+  return {
+    length: currentQueue.length,
+    items
+  };
+};
+
 export const removeOldestFromQueue = () => {
   currentQueue.shift();
   nextQueueAction();
