@@ -1,4 +1,5 @@
 import { SendEmailRequest } from "customerio-node";
+
 import { removeOldestFromQueue } from "./queue";
 
 interface EmailOptions {
@@ -7,6 +8,11 @@ interface EmailOptions {
     title: string;
     link: string;
   };
+}
+
+interface ErrorEmailOptions {
+  email: string;
+  errorString: string;
 }
 
 export const CIO_HOST = "https://api.customer.io/";
@@ -28,6 +34,32 @@ export async function sendEmail(api, options: EmailOptions): Promise<void> {
     Title: ${options.video.title}<br>
     
     You can view it here: ${options.video.link}`,
+    identifiers: {
+      email: options.email
+    }
+  });
+
+  api
+    .sendEmail(request)
+    .then((res) => console.log("Successfully sent email to " + options.email))
+    .catch((err) => {
+      console.log(err, err.statusCode, err.message);
+      removeOldestFromQueue();
+    });
+}
+
+export async function sendErrorEmail(
+  api,
+  options: ErrorEmailOptions
+): Promise<void> {
+  const request = new SendEmailRequest({
+    to: options.email,
+    from: CIO_DEFAULT_FROM_EMAIL,
+    subject: "Your translated video had an error uploading!",
+    body: `<strong>Your translated video has an error unloading</strong><br><br>
+    
+    Error: ${options.errorString}`,
+
     identifiers: {
       email: options.email
     }

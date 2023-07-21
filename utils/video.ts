@@ -12,7 +12,7 @@ import { youtube_v3 } from "googleapis";
 import { YoutubeTranscript } from "youtube-transcript";
 
 import { SupportedLanguages, TranslatedTranscriptPart } from "../types";
-import { sendEmail } from "./emails";
+import { sendEmail, sendErrorEmail } from "./emails";
 import { saveFile } from "./files";
 import { removeOldestFromQueue } from "./queue";
 import { basicTranslation, getTranslations } from "./translation";
@@ -202,58 +202,72 @@ export const createTranslatedVideo = async (
 
       const fileSize = statSync(newVideoInfo.videoFile).size;
 
-      const publishedVideo = await youtube.videos.insert(
-        {
-          notifySubscribers: false,
-          part: ["snippet", "status"],
-          requestBody: {
-            snippet: {
-              title: newVideoInfo.title,
-              description: newVideoInfo.description
-            },
-            status: {
-              privacyStatus: "unlisted"
-            }
-          },
-          media: {
-            body: createReadStream(newVideoInfo.videoFile)
-          }
-        },
-        {
-          // Use the `onUploadProgress` event from Axios to track the
-          // number of bytes uploaded to this point.
-          onUploadProgress: (evt) => {
-            const progress = (evt.bytesRead / fileSize) * 100;
-
-            if (progress === 100) {
-              console.log("\n\n");
-              console.log("Video Uploaded");
-              console.log("Deleting Video & Files..");
-              unlinkSync(newVideoInfo.videoFile);
-              unlinkSync(`./translations/${language}/${videoId}.json`);
-              unlinkSync(`./videos/${videoId}.mp4`);
-
-              console.log("Video Deleted");
-            }
-          }
-        }
-      );
-
       const emailAPI = new APIClient(process.env.CIO_APP_KEY, {
         region: RegionUS
       });
 
-      sendEmail(emailAPI, {
-        email: email,
-        video: {
-          title: newVideoInfo.title,
-          link: `https://www.youtube.com/watch?v=${publishedVideo.data.id}`
-        }
-      });
-      removeOldestFromQueue();
-      console.log("\n\n");
+      try {
+        const publishedVideo = await youtube.videos.insert(
+          {
+            notifySubscribers: false,
+            part: ["snippet", "status"],
+            requestBody: {
+              snippet: {
+                title: newVideoInfo.title,
+                description: newVideoInfo.description
+              },
+              status: {
+                privacyStatus: "unlisted"
+              }
+            },
+            media: {
+              body: createReadStream(newVideoInfo.videoFile)
+            }
+          },
+          {
+            // Use the `onUploadProgress` event from Axios to track the
+            // number of bytes uploaded to this point.
+            onUploadProgress: (evt) => {
+              const progress = (evt.bytesRead / fileSize) * 100;
+
+              if (progress === 100) {
+                console.log("\n\n");
+                console.log("Video Uploaded");
+                console.log("Deleting Video & Files..");
+                unlinkSync(newVideoInfo.videoFile);
+                unlinkSync(`./translations/${language}/${videoId}.json`);
+                unlinkSync(`./videos/${videoId}.mp4`);
+
+                console.log("Video Deleted");
+              }
+            }
+          }
+        );
+
+        sendEmail(emailAPI, {
+          email: email,
+          video: {
+            title: newVideoInfo.title,
+            link: `https://www.youtube.com/watch?v=${publishedVideo.data.id}`
+          }
+        });
+        removeOldestFromQueue();
+        console.log("\n\n");
+      } catch (e) {
+        console.log("An error occurred while uploading the video:", e);
+
+        sendErrorEmail(emailAPI, {
+          email: email,
+          errorString: "Unknown Error Occurred"
+        });
+        removeOldestFromQueue();
+        console.log("\n\n");
+        return;
+      }
     } catch (e) {
       console.log("An error occurred while creating the video:", e);
+      removeOldestFromQueue();
+      console.log("\n\n");
     }
   });
 };
