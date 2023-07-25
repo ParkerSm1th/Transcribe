@@ -82,6 +82,11 @@ export const fetchVideo = async (videoId: string, download = true) => {
   return videoInfo;
 };
 
+const trimSentence = (sentence: string, charLength: number) => {
+  if (sentence.length <= charLength) return sentence;
+  return sentence.slice(0, sentence.lastIndexOf(" ", charLength)) + "...";
+};
+
 const addTranslatedTextToVideo = async (
   videoId: string,
   language: SupportedLanguages,
@@ -213,8 +218,8 @@ export const createTranslatedVideo = async (
             part: ["snippet", "status"],
             requestBody: {
               snippet: {
-                title: newVideoInfo.title,
-                description: newVideoInfo.description
+                title: trimSentence(newVideoInfo.title, 100),
+                description: trimSentence(newVideoInfo.description, 5000)
               },
               status: {
                 privacyStatus: "unlisted"
