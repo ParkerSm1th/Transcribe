@@ -84,7 +84,7 @@ export const fetchVideo = async (videoId: string, download = true) => {
 
 const trimSentence = (sentence: string, charLength: number) => {
   if (sentence.length <= charLength) return sentence;
-  return sentence.slice(0, sentence.lastIndexOf(" ", charLength)) + "...";
+  return sentence.slice(0, sentence.lastIndexOf(" ", charLength - 3)) + "...";
 };
 
 const addTranslatedTextToVideo = async (
