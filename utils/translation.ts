@@ -1,4 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
+
 import { OpenAiMessage, SupportedLanguages, TranscriptPart } from "../types";
 import { getPrompt } from "./ai";
 import { removeOldestFromQueue } from "./queue";
@@ -64,7 +65,7 @@ export const basicTranslation = async (
     {
       role: "user",
       content: `Translate the ${type} of this video from English to ${language}, do not give me anything other than the translated text as a string.
-        
+        *IMPORTANT*: If you see the word "Magical" do not translate it, it is the name of a company.
         Here is the ${type} in English:
         ${stringToTranslate}`
     }
